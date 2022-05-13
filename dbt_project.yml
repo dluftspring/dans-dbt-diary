@@ -1,0 +1,43 @@
+
+name: 'dans-dbt-diary'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dans-dbt-diary'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Hooks
+on-run-start:
+  - "{{ create_udfs() }}"
+on-run-end:
+  - "{{ grant_select_on_schemas(schemas) }}"
+  - "{{ grant_usage_on_udfs() }}"
+
+vars:
+  shares:
+    - name: some_share
+      databases:
+        - ANALYTICS_DB
+      accounts:
+        - ABCDEFGHIJK
+
+  internal_domains: ('%joinlane%', '%vts%', '%applydigital%', '%star.global%', '%swmansion%', '%velocitylabs%')
+  # and not (user_email like any {{ var('internal_domains') | as_native }})
+
+target-path: "target"  
+clean-targets:         
+  - "target"
+  - "dbt_packages"
+
+models:
+  dans-dbt-diary:
+    marts: 
+      +materialized: table
+    staging:
+      +materialized: view
